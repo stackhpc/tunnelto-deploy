@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -e
+
+TUNNELTO_ARGS=
+
+# Print control host information
+if [ -n "$CTRL_HOST" ]; then
+    echo "[INFO] Using control host at $CTRL_HOST:${CTRL_PORT:-443}"
+else
+    echo "[INFO] Using default control host at tunnelto.dev"
+
+    # When using the default control host, an API key is required
+    if [ -n "$TUNNELTO_DEV_API_KEY" ]; then
+        TUNNELTO_ARGS="$TUNNELTO_ARGS --key $TUNNELTO_DEV_API_KEY"
+    else
+        echo "[ERROR] API key is required when using tunnelto.dev" 1>&2
+        exit 1
+    fi
+fi
+
+if [ -n "$FORWARD_TO_HOST" ]; then
+    TUNNELTO_ARGS="$TUNNELTO_ARGS --host $FORWARD_TO_HOST"
+else
+    echo "[ERROR] Host to forward to must be specified using FORWARD_TO_HOST" 1>&2
+    exit 1
+fi
+if [ -n "$FORWARD_TO_PORT" ]; then
+    TUNNELTO_ARGS="$TUNNELTO_ARGS --port $FORWARD_TO_PORT"
+else
+    echo "[ERROR] Port to forward to must be specified using FORWARD_TO_PORT" 1>&2
+    exit 1
+fi
+if [ -n "$FORWARD_TO_SCHEME" ]; then
+    TUNNELTO_ARGS="$TUNNELTO_ARGS --scheme $FORWARD_TO_SCHEME"
+fi
+echo "[INFO] Forwarding traffic to ${FORWARD_TO_SCHEME:-http}://$FORWARD_TO_HOST:$FORWARD_TO_PORT"
+
+if [ -n "$SUBDOMAIN" ]; then
+    TUNNELTO_ARGS="$TUNNELTO_ARGS --port $FORWARD_TO_PORT"
+    echo "[INFO] Requesting explicit subdomain: $SUBDOMAIN"
+fi
+
+exec /usr/bin/tunnelto $TUNNELTO_ARGS
