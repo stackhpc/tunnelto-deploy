@@ -3,7 +3,7 @@ name: Publish image
 on:
   push:
     paths:
-      - .github/workflows/build-push-images.yml
+      - .github/workflows/build-push-images.yaml
       - images/**
 jobs:
   push_to_registry:
