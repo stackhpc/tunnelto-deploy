@@ -13,18 +13,6 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
-      - name: Calculate tags for server image
-        id: server-image-tags
-        env:
-          REPOSITORY: ghcr.io/stackhpc/tunnelto-server
-        run: ./scripts/image-tags.sh
-
-      - name: Calculate tags for client image
-        id: client-image-tags
-        env:
-          REPOSITORY: ghcr.io/stackhpc/tunnelto-client
-        run: ./scripts/image-tags.sh
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
@@ -70,25 +58,49 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-      # - name: Build and push server image
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: ./images/server
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: ${{ steps.server-image-tags.outputs.TAGS }}
-      #     cache-from: type=local,src=/tmp/.buildx-cache
-      #     cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Meta for server image
+        id: server-meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/stackhpc/tunnelto-server
+          # Produce the branch name or tag and the SHA as tags
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,prefix=
 
-      # - name: Build and push client image
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: ./images/client
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: ${{ steps.client-image-tags.outputs.TAGS }}
-      #     cache-from: type=local,src=/tmp/.buildx-cache
-      #     cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Build and push server image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./images/server
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.server-meta.outputs.tags }}
+          labels: ${{ steps.server-meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Meta for client image
+        id: client-meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/stackhpc/tunnelto-client
+          # Produce the branch name or tag and the SHA as tags
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,prefix=
+
+      - name: Build and push client image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./images/client
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.client-meta.outputs.tags }}
+          labels: ${{ steps.client-meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       # Temp fix
       # https://github.com/docker/build-push-action/issues/252
