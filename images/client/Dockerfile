@@ -5,9 +5,8 @@
 #####
 
 # Using a named stage here allows us to have ARGs in it
-ARG TUNNELTO_BUILDER_IMAGE=ghcr.io/stackhpc/tunnelto-build
-ARG TUNNELTO_BUILDER_TAG=latest
-FROM ${TUNNELTO_BUILDER_IMAGE}:${TUNNELTO_BUILDER_TAG} AS build
+ARG TUNNELTO_BUILDER_IMAGE=ghcr.io/stackhpc/tunnelto-build:latest
+FROM ${TUNNELTO_BUILDER_IMAGE} AS build
 
 
 FROM debian:buster-slim

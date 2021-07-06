@@ -31,13 +31,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build builder image
+      - name: Meta for builder image
+        id: build-meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/stackhpc/tunnelto-build
+          # Just tag with the SHA
+          tags: |
+            type=sha,prefix=
+
+      - name: Build and push builder image
         uses: docker/build-push-action@v2
         with:
           context: ./images/build
-          push: false
-          # Just tag it with the tag expected by the server and client
-          tags: ghcr.io/stackhpc/tunnelto-build:latest
+          push: true
+          tags: ${{ steps.build-meta.outputs.tags }}
+          labels: ${{ steps.build-meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
@@ -59,6 +68,8 @@ jobs:
           push: true
           tags: ${{ steps.server-meta.outputs.tags }}
           labels: ${{ steps.server-meta.outputs.labels }}
+          build-args: |
+            TUNNELTO_BUILDER_IMAGE=${{ steps.build-meta.outputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
@@ -80,6 +91,8 @@ jobs:
           push: true
           tags: ${{ steps.client-meta.outputs.tags }}
           labels: ${{ steps.client-meta.outputs.labels }}
+          build-args: |
+            TUNNELTO_BUILDER_IMAGE=${{ steps.build-meta.outputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
