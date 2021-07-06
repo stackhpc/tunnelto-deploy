@@ -4,18 +4,10 @@
 ## https://github.com/agrinman/tunnelto
 #####
 
-FROM rust:slim AS build
-
-# Install required packages
-RUN apt-get update && \
-    apt-get install -y git libssl-dev pkg-config && \
-    rm -rf /var/lib/apt/lists/*
-
-ARG TUNNELTO_REPO=https://github.com/agrinman/tunnelto.git
-ARG TUNNELTO_TAG=0.1.18
-RUN git clone --depth 1 --branch $TUNNELTO_TAG $TUNNELTO_REPO /opt/tunnelto && \
-    cd /opt/tunnelto && \
-    cargo build --bin tunnelto --release
+# Using a named stage here allows us to have ARGs in it
+ARG TUNNELTO_BUILDER_IMAGE=ghcr.io/stackhpc/tunnelto-build
+ARG TUNNELTO_BUILDER_TAG=latest
+FROM ${TUNNELTO_BUILDER_IMAGE}:${TUNNELTO_BUILDER_TAG} AS build
 
 
 FROM debian:buster-slim
@@ -39,7 +31,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the client binary from the build
-COPY --from=build /opt/tunnelto/target/release/tunnelto /usr/bin/
+COPY --from=build /opt/tunnelto/src/target/release/tunnelto /usr/bin/
 # Copy the entrypoint script
 COPY ./tunnelto-init /usr/bin/
 

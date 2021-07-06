@@ -36,6 +36,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build builder image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./images/build
+          platforms: linux/amd64,linux/arm64
+          push: false
+          # Just tag it with the tag expected by the server and client
+          tags: ghcr.io/stackhpc/tunnel-build:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
       - name: Meta for server image
         id: server-meta
         uses: docker/metadata-action@v3
