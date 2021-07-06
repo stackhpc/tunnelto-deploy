@@ -43,7 +43,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: false
           # Just tag it with the tag expected by the server and client
-          tags: ghcr.io/stackhpc/tunnel-build:latest
+          tags: ghcr.io/stackhpc/tunnelto-build:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
