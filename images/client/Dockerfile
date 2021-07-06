@@ -15,7 +15,7 @@ ARG TUNNELTO_REPO=https://github.com/agrinman/tunnelto.git
 ARG TUNNELTO_TAG=0.1.18
 RUN git clone --depth 1 --branch $TUNNELTO_TAG $TUNNELTO_REPO /opt/tunnelto && \
     cd /opt/tunnelto && \
-    cargo build --bins --release
+    cargo build --bin tunnelto --release
 
 
 FROM debian:buster-slim

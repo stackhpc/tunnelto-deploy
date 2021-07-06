@@ -1,0 +1,10 @@
+45,46c45,46
+<     pub static ref AUTH_DB_SERVICE: AuthDbService =
+<         AuthDbService::new().expect("failed to init auth-service");
+---
+>     // pub static ref AUTH_DB_SERVICE: AuthDbService =
+>     //     AuthDbService::new().expect("failed to init auth-service");
+50c50
+<     // pub static ref AUTH_DB_SERVICE: crate::auth::NoAuth = crate::auth::NoAuth;
+---
+>     pub static ref AUTH_DB_SERVICE: crate::auth::NoAuth = crate::auth::NoAuth;
